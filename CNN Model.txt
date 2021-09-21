@@ -1,0 +1,47 @@
+RGB values are used to classify an image.
+
+Disadvantage of ANN:
+* too much computation
+* Treat local pixels same
+
+* To detect a number we use loopy filter.
+ 
+*Loopy pattern filters are used to detect loops or linear structures.
+
+*Pooling is used to reduce the size of feature map.
+
+*Max pooling is good
+Benifits
+======
+reduces dimenisions and computations
+
+*Reduces overfitting
+* Model is tolerant towards variations, distoritions.
+
+Benifts of CNN
+===========
+1) Connections sparsity reduces overfitting
+
+2) Conv +  pooling gives location invariant
+3) Parameter sharing
+
+ReLU:
+=====
+*Introduces nonlinearity
+* Speeds up training, Faster to compute
+
+pooling:
+=====
+* Reduces dim and computation
+* Reduces overfitting
+* Makes the model tolerant towards small distortion and variations
+
+*CNN cannot handles rotation and scale , so it need some sample data sets.
+
+
+
+
+
+
+ 
+ 

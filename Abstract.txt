@@ -1,0 +1,15 @@
+ML:
+===
+image classification,
+cifar10 dataset(anilmals),
+git hub,
+time.
+
+I/P: set of images
+===
+red,green,orange
+
+o/p: 
+===
+voice for 30secs
+and repeatition.
