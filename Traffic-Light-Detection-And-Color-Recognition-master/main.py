@@ -1,27 +1,29 @@
+# Author - Dharmateja
 
-##### Author - Nilesh Chopda
+# Project - Traffic Light Detection and Color Recognition using Tensorflow Object Detection API
 
-##### Project - Traffic Light Detection and Color Recognition using Tensorflow Object Detection API
-
-
-### Import Important Libraries
-
-import numpy as np
-import os
-import six.moves.urllib as urllib
-import tarfile
-import tensorflow as tf
-from matplotlib import pyplot as plt
-from PIL import Image
+# Import Important Libraries
+import pyttsx3
+import numpy as np  
+import os 
+import six.moves.urllib as urllib  #provides modules both common to py2 and py3
+import tarfile #Python tarfile module is used to read and write tar archives and to manage compressed files
+import tensorflow as tf  # It is an open sourse AI library used to create large scale neural networks with many layers
+from matplotlib import pyplot as plt #It is used for visualization purpose
+from PIL import Image #To load an image we use pillow module
 from os import path
-from utils import label_map_util
+from utils import label_map_util #Utils is the collection of small python functions and classes 
 from utils import visualization_utils as vis_util
 import time
-import cv2
+import cv2 # It is used for computer vision purpose
+
+import tensorflow.compat.v1 as tf # It allows us to use any version of tensor flow into program
+tf.disable_v2_behavior()  # switching to v1 and stoping v2
 
 
-### Function To Detect Red and Yellow Color
-# Here,we are detecting only Red and Yellow colors for the traffic lights as we need to stop the car when it detects these colors.
+
+# Function To Detect Red and Yellow Color
+# Here,we are detecting only Red and Yellow colors for the traffic lights as we need to stop the person when it detects these colors.
 
 def detect_red_and_yellow(img, Threshold=0.01):
     """
@@ -32,7 +34,8 @@ def detect_red_and_yellow(img, Threshold=0.01):
     """
 
     desired_dim = (30, 90)  # width, height
-    img = cv2.resize(np.array(img), desired_dim, interpolation=cv2.INTER_LINEAR)
+    img = cv2.resize(np.array(img), desired_dim,
+                     interpolation=cv2.INTER_LINEAR)
     img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
 
     # lower mask (0-10)
@@ -62,8 +65,7 @@ def detect_red_and_yellow(img, Threshold=0.01):
         return False
 
 
-
-### Loading Image Into Numpy Array
+# Loading Image Into Numpy Array
 
 def load_image_into_numpy_array(image):
     (im_width, im_height) = image.size
@@ -71,7 +73,7 @@ def load_image_into_numpy_array(image):
         (im_height, im_width, 3)).astype(np.uint8)
 
 
-### Read Traffic Light objects
+# Read Traffic Light objects
 # Here,we will write a function to detect TL objects and crop this part of the image to recognize color inside the object. We will create a stop flag,which we will use to take the actions based on recognized color of the traffic light.
 
 def read_traffic_lights_object(image, boxes, scores, classes, max_boxes_to_draw=20, min_score_thresh=0.5,
@@ -87,11 +89,11 @@ def read_traffic_lights_object(image, boxes, scores, classes, max_boxes_to_draw=
 
             if detect_red_and_yellow(crop_img):
                 stop_flag = True
-
+  
     return stop_flag
 
 
-### Function to Plot detected image
+# Function to Plot detected image
 
 def plot_origin_image(image_np, boxes, classes, scores, category_index):
     # Size of the output images.
@@ -113,7 +115,14 @@ def plot_origin_image(image_np, boxes, classes, scores, category_index):
     plt.show()
 
 
-### Function to Detect Traffic Lights and to Recognize Color
+#Function to output Audio
+def tts(result):
+    text_speech = pyttsx3.init()
+    text_speech.say(result)
+    text_speech.runAndWait()
+
+
+# Function to Detect Traffic Lights and to Recognize Color
 
 def detect_traffic_lights(PATH_TO_TEST_IMAGES_DIR, MODEL_NAME, Num_images, plot_flag=False):
     """
@@ -124,7 +133,8 @@ def detect_traffic_lights(PATH_TO_TEST_IMAGES_DIR, MODEL_NAME, Num_images, plot_
     """
 
     # --------test images------
-    TEST_IMAGE_PATHS = [os.path.join(PATH_TO_TEST_IMAGES_DIR, 'img_{}.jpg'.format(i)) for i in range(1, Num_images + 1)]
+    TEST_IMAGE_PATHS = [os.path.join(PATH_TO_TEST_IMAGES_DIR, 'img_{}.jpg'.format(
+        i)) for i in range(1, Num_images + 1)]
 
     commands = []
 
@@ -155,7 +165,7 @@ def detect_traffic_lights(PATH_TO_TEST_IMAGES_DIR, MODEL_NAME, Num_images, plot_
     detection_graph = tf.Graph()
     with detection_graph.as_default():
         od_graph_def = tf.GraphDef()
-        with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
+        with tf.io.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
             serialized_graph = fid.read()
             od_graph_def.ParseFromString(serialized_graph)
             tf.import_graph_def(od_graph_def, name='')
@@ -172,12 +182,16 @@ def detect_traffic_lights(PATH_TO_TEST_IMAGES_DIR, MODEL_NAME, Num_images, plot_
             # Definite input and output Tensors for detection_graph
             image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
             # Each box represents a part of the image where a particular object was detected.
-            detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+            detection_boxes = detection_graph.get_tensor_by_name(
+                'detection_boxes:0')
             # Each score represent how level of confidence for each of the objects.
             # Score is shown on the result image, together with the class label.
-            detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
-            detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
-            num_detections = detection_graph.get_tensor_by_name('num_detections:0')
+            detection_scores = detection_graph.get_tensor_by_name(
+                'detection_scores:0')
+            detection_classes = detection_graph.get_tensor_by_name(
+                'detection_classes:0')
+            num_detections = detection_graph.get_tensor_by_name(
+                'num_detections:0')
 
             for image_path in TEST_IMAGE_PATHS:
                 image = Image.open(image_path)
@@ -189,7 +203,8 @@ def detect_traffic_lights(PATH_TO_TEST_IMAGES_DIR, MODEL_NAME, Num_images, plot_
                 image_np_expanded = np.expand_dims(image_np, axis=0)
                 # Actual detection.
                 (boxes, scores, classes, num) = sess.run(
-                    [detection_boxes, detection_scores, detection_classes, num_detections],
+                    [detection_boxes, detection_scores,
+                        detection_classes, num_detections],
                     feed_dict={image_tensor: image_np_expanded})
 
                 stop_flag = read_traffic_lights_object(image, np.squeeze(boxes), np.squeeze(scores),
@@ -197,24 +212,28 @@ def detect_traffic_lights(PATH_TO_TEST_IMAGES_DIR, MODEL_NAME, Num_images, plot_
                 if stop_flag:
                     # print('{}: stop'.format(image_path))  # red or yellow
                     commands.append(False)
-                    cv2.putText(image_np, 'Stop', (15, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+                    tts("Please don't cross the road Now")
+                    cv2.putText(image_np, 'Stop', (15, 25), 
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
                 else:
                     # print('{}: go'.format(image_path))
                     commands.append(True)
-                    cv2.putText(image_np, 'Go', (15, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                    tts("Now you can cross the road safely")
+                    cv2.putText(image_np, 'Go', (15, 25),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
 
                 # Visualization of the results of a detection.
                 if plot_flag:
-                    plot_origin_image(image_np, boxes, classes, scores, category_index)
-
+                    plot_origin_image(image_np, boxes, classes,
+                                      scores, category_index)
+                                      
     return commands
 
-
-### Let's detect Traffic lights in test_images directory
+# Let's detect Traffic lights in test_images directory
 
 if __name__ == "__main__":
     # Specify number of images to detect
-    Num_images = 17
+    Num_images = 3
 
     # Specify test directory path
     PATH_TO_TEST_IMAGES_DIR = './test_images'
@@ -222,11 +241,8 @@ if __name__ == "__main__":
     # Specify downloaded model name
     # MODEL_NAME ='ssd_mobilenet_v1_coco_11_06_2017'    # for faster detection but low accuracy
     MODEL_NAME = 'faster_rcnn_resnet101_coco_11_06_2017'  # for improved accuracy
-
-    commands = detect_traffic_lights(PATH_TO_TEST_IMAGES_DIR, MODEL_NAME, Num_images, plot_flag=True)
-    print(commands)  # commands to print action type, for 'Go' this will return True and for 'Stop' this will return False
-
-
-
-
-
+    
+    commands = detect_traffic_lights(
+        PATH_TO_TEST_IMAGES_DIR, MODEL_NAME, Num_images, plot_flag = True)
+    # commands to print action type, for 'Go' this will return True and for 'Stop' this will return False
+    print(commands) #These commands are Used to convert into speech
