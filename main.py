@@ -1,5 +1,5 @@
 
-# Author - Nilesh Chopda
+# Author - Dharmateja Konda
 
 # Project - Traffic Light Detection and Color Recognition using Tensorflow Object Detection API
 
